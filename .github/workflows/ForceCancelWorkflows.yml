@@ -1,0 +1,41 @@
+name: Force Cancel Specific Workflow Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'Repository owner'
+        required: true
+        default: 'your username'  # your github username
+      repo:
+        description: 'Repository name'
+        required: true
+        default: 'your repository'  # the reposiroty that the specified workflow/action belongs to
+      workflow_name:
+        description: 'Workflow name'
+        required: true
+        default: 'CI'  # Defined in yml like 'Force Cancel Specific Workflow Run' in this workflow
+      run_id:
+        description: 'Workflow Run ID'
+        required: true
+        default: '10000'  # you may get id of the specified workflow by another .yml
+        
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  force_cancel_specific_run:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Force Cancel Specific Workflow Run
+        run: |
+          echo "Force cancelling workflow: ${{ github.event.inputs.workflow_name }} with ID: ${{ github.event.inputs.run_id }} in repository ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}."
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }}/actions/runs/${{ github.event.inputs.run_id }}/force-cancel

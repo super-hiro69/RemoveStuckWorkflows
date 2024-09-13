@@ -1,0 +1,40 @@
+name: Find Workflow Run ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: 'Repository owner'
+        required: true
+        default: 'your username'  # your github username
+      repo:
+        description: 'Repository name'
+        required: true
+        default: 'your repository'  # the reposiroty that the specified workflow/action belongs to
+      workflow_name:
+        description: 'Workflow name'
+        required: true
+        default: 'CI'  # Defined in yml like 'Find Workflow Run ID' in this workflow
+      limit:
+        description: 'Size of list'
+        required: true
+        default: '10'  # the size of the list
+
+permissions:
+  actions: read
+  contents: read
+  
+jobs:
+  list_workflow_runs:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Authenticate via GitHub Token
+
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: List Workflow Runs
+        run: |
+          echo "Listing workflow: ${{ github.event.inputs.workflow_name }}"
+          gh run list --repo ${{ github.event.inputs.owner }}/${{ github.event.inputs.repo }} --workflow="${{ github.event.inputs.workflow_name }}" --limit ${{ github.event.inputs.limit }}
